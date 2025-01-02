@@ -1,0 +1,211 @@
+﻿@page "/cars"
+@rendermode InteractiveServer
+
+<h3 class="text-center mb-4 fw-bold text-primary">🚗 Search your car</h3>
+
+<div class="container shadow-lg p-4 rounded-3 bg-white">
+    <!-- Filter Section -->
+    <div class="row mb-4 g-3">
+        <!-- Brand Selection -->
+        <div class="col-md-3">
+            <label for="carBrand" class="form-label fw-semibold">Car Brand:</label>
+            <select id="carBrand" class="form-select" @bind="selectedBrand" @bind:event="onchange">
+                <option value="">-- All Brands --</option>
+                @foreach (var brand in carBrands.Keys)
+                {
+                    <option value="@brand">@brand</option>
+                }
+            </select>
+        </div>
+        <!-- Model Selection -->
+        <div class="col-md-3">
+            <label for="carModel" class="form-label fw-semibold">Car Model:</label>
+            <select id="carModel" class="form-select" @bind="selectedModel" disabled="@string.IsNullOrEmpty(selectedBrand)">
+                <option value="">-- Select Model --</option>
+                @if (!string.IsNullOrEmpty(selectedBrand))
+                {
+                    @foreach (var model in carBrands[selectedBrand])
+                    {
+                        <option value="@model">@model</option>
+                    }
+                }
+            </select>
+        </div>
+        <!-- Year Selection -->
+        <div class="col-md-3">
+            <label for="year" class="form-label fw-semibold">Year:</label>
+            <select id="year" class="form-select" @bind="selectedYear">
+                <option value="">-- Select Year --</option>
+                @foreach (var year in years)
+                {
+                    <option value="@year">@year</option>
+                }
+            </select>
+        </div>
+        <!-- Price Range -->
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Price Range:</label>
+            <div class="input-group">
+                <input type="number" class="form-control" placeholder="From" @bind="priceFrom" min="1" max="1000000" />
+                <span class="input-group-text">-</span>
+                <input type="number" class="form-control" placeholder="To" @bind="priceTo" min="1" max="1000000" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4 g-3">
+        <!-- Kilometers Range -->
+        <div class="col-md-3">
+            <label for="kilometers" class="form-label fw-semibold">Kilometers:</label>
+            <div class="input-group">
+                <input type="number" class="form-control" placeholder="From" @bind="kilometersFrom" min="0" max="1000000" />
+                <span class="input-group-text">-</span>
+                <input type="number" class="form-control" placeholder="To" @bind="kilometersTo" min="0" max="1000000" />
+            </div>
+        </div>
+        <!-- Horsepower Range -->
+        <div class="col-md-3">
+            <label for="horsePower" class="form-label fw-semibold">Horsepower:</label>
+            <div class="input-group">
+                <input type="number" class="form-control" placeholder="From" @bind="horsePowerFrom" min="1" max="1500" />
+                <span class="input-group-text">-</span>
+                <input type="number" class="form-control" placeholder="To" @bind="horsePowerTo" min="1" max="1500" />
+            </div>
+        </div>
+        <!-- Fuel Type Selection -->
+        <div class="col-md-3">
+            <label for="fuelType" class="form-label fw-semibold">Fuel Type:</label>
+            <select id="fuelType" class="form-select" @bind="fuelType">
+                <option value="">-- Select Fuel Type --</option>
+                <option value="Petrol">Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Electric">Electric</option>
+                <option value="Hybrid">Hybrid</option>
+            </select>
+        </div>
+        <!-- Emission Class Selection -->
+        <div class="col-md-3">
+            <label for="emissionClass" class="form-label fw-semibold">Emission Class:</label>
+            <select id="emissionClass" class="form-select" @bind="emissionClass">
+                <option value="">-- Select Emission Class --</option>
+                <option value="Euro 5">Euro 5</option>
+                <option value="Euro 6">Euro 6</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row mb-4 g-3">
+        <!-- Filter Button -->
+        <div class="col-md-12 d-grid">
+            <button class="btn btn-primary btn-lg fw-semibold" @onclick="OnFilterClicked">🔍 Filter Cars</button>
+        </div>
+    </div>
+</div>
+
+<!-- Car List Section -->
+<div class="container mt-5">
+    <h4 class="fw-bold mb-3">Available Cars:</h4>
+    @if (filteredCars.Any())
+    {
+        <div class="row g-3">
+            @foreach (var car in filteredCars)
+            {
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0">
+                        <img src="@car.ImageUrl" class="card-img-top" alt="@car.Model">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@car.Brand @car.Model</h5>
+                            <p class="card-text">
+                                Year: @car.Year <br>
+                                Price: $@car.Price <br>
+                                Transmission: @car.TransmissionType
+                            </p>
+                            <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">No cars match the selected criteria.</p>
+    }
+</div>
+
+@code {
+    private string selectedBrand = string.Empty;
+    private string selectedModel = string.Empty;
+    private string selectedYear = string.Empty;
+    private decimal? priceFrom = null;
+    private decimal? priceTo = null;
+    private int? kilometersFrom = null;
+    private int? kilometersTo = null;
+    private int? horsePowerFrom = null;
+    private int? horsePowerTo = null;
+    private string fuelType = string.Empty;
+    private string emissionClass = string.Empty;
+
+    private List<Car> allCars = new List<Car>
+    {
+        new Car { Brand = "Audi", Model = "A4", Year = 2020, Price = 25000, TransmissionType = "Automatic", Kilometers = 15000, HorsePower = 200, FuelType = "Petrol", EmissionClass = "Euro 6", ImageUrl = "https://assets.adac.de/image/upload/v1/Autodatenbank/Fahrzeugbilder/im05969-1-audi-a4-gtron.jpg"  },
+        new Car { Brand = "BMW", Model = "X3", Year = 2019, Price = 30000, TransmissionType = "Manual", Kilometers = 25000, HorsePower = 250, FuelType = "Diesel", EmissionClass = "Euro 6", ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg/1920px-2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg" },
+        new Car { Brand = "Mercedes-Benz", Model = "C-Class", Year = 2021, Price = 40000, TransmissionType = "Automatic", Kilometers = 10000, HorsePower = 300, FuelType = "Electric", EmissionClass = "Euro 6", ImageUrl = "https://vehicle-images.dealerinspire.com/94d1-110007965/W1KAF4GB5RR172203/11b2b2febedcb4d9e81e10de8fb47c7e.png" },
+        new Car { Brand = "Audi", Model = "A4", Year = 2020, Price = 25000, TransmissionType = "Automatic", Kilometers = 15000, HorsePower = 200, FuelType = "Petrol", EmissionClass = "Euro 6", ImageUrl = "https://assets.adac.de/image/upload/v1/Autodatenbank/Fahrzeugbilder/im05969-1-audi-a4-gtron.jpg"  },
+        new Car { Brand = "BMW", Model = "X3", Year = 2019, Price = 30000, TransmissionType = "Manual", Kilometers = 25000, HorsePower = 250, FuelType = "Diesel", EmissionClass = "Euro 6", ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg/1920px-2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg" },
+        new Car { Brand = "Mercedes-Benz", Model = "C-Class", Year = 2021, Price = 40000, TransmissionType = "Automatic", Kilometers = 10000, HorsePower = 300, FuelType = "Electric", EmissionClass = "Euro 6", ImageUrl = "https://vehicle-images.dealerinspire.com/94d1-110007965/W1KAF4GB5RR172203/11b2b2febedcb4d9e81e10de8fb47c7e.png" },
+
+    };
+
+    private List<Car> filteredCars = new List<Car>();
+
+    private Dictionary<string, List<string>> carBrands = new Dictionary<string, List<string>>
+    {
+        { "Audi", new List<string> { "A3", "A4", "Q5" } },
+        { "BMW", new List<string> { "X3", "X5" } },
+        { "Mercedes-Benz", new List<string> { "C-Class", "E-Class" } }
+    };
+
+    private List<int> years = Enumerable.Range(1980, DateTime.Now.Year - 1979).ToList();
+
+    private void OnFilterClicked()
+    {
+        filteredCars = allCars.Where(car =>
+            (string.IsNullOrEmpty(selectedBrand) || car.Brand == selectedBrand) &&
+            (string.IsNullOrEmpty(selectedModel) || car.Model == selectedModel) &&
+            (string.IsNullOrEmpty(selectedYear) || car.Year.ToString() == selectedYear) &&
+            (!priceFrom.HasValue || car.Price >= priceFrom.Value) &&
+            (!priceTo.HasValue || car.Price <= priceTo.Value) &&
+            (!kilometersFrom.HasValue || car.Kilometers >= kilometersFrom.Value) &&
+            (!kilometersTo.HasValue || car.Kilometers <= kilometersTo.Value) &&
+            (!horsePowerFrom.HasValue || car.HorsePower >= horsePowerFrom.Value) &&
+            (!horsePowerTo.HasValue || car.HorsePower <= horsePowerTo.Value) &&
+            (string.IsNullOrEmpty(fuelType) || car.FuelType == fuelType) &&
+            (string.IsNullOrEmpty(emissionClass) || car.EmissionClass == emissionClass)
+        ).ToList();
+    }
+
+    public class Car
+    {
+        public string Brand { get; set; }
+        public string Model { get; set; }
+        public int Year { get; set; }
+        public decimal Price { get; set; }
+        public string TransmissionType { get; set; }
+        public int Kilometers { get; set; }
+        public int HorsePower { get; set; }
+        public string FuelType { get; set; }
+        public string EmissionClass { get; set; }
+        public string ImageUrl { get; set; }
+    }
+   
+
+} <footer class="bg-dark text-white text-center py-4 mt-5">
+    <div class="container">
+        <p class="mb-0">© 2025 CarSearch. All Rights Reserved.</p>
+        <p>
+            <a href="#" class="text-white text-decoration-none">Privacy Policy</a> |
+            <a href="#" class="text-white text-decoration-none">Terms of Service</a>
+        </p>
+    </div>
+</footer>
