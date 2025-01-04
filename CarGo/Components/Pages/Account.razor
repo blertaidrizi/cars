@@ -1,3 +1,50 @@
 ﻿@page "/account"
-<h3>account</h3>
-<p>This is the acount page page.</p>
+@rendermode InteractiveServer
+
+<section class="account-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Hyr ose Regjistrohu</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <ul class="nav nav-tabs" role="tablist">
+                    @foreach (var tab in tabs)
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link @(activeTab == tab.TabName ? "active" : "")" @onclick="() => SwitchTab(tab.TabName)" type="button">@tab.DisplayName</button>
+                        </li>
+                    }
+                </ul>
+                <div class="tab-content" id="accountTabsContent">
+                    @if (activeTab == "login")
+                    {
+                        <LoginForm />
+                    }
+                    @if (activeTab == "register")
+                    {
+                        <RegisterForm />
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta text-center py-5  text-black">
+    <div>
+        <h2>Bashkohu me rrjetin tonë sot!</h2>
+    </div>
+</section>
+
+@code {
+    private string activeTab = "login";
+    private List<(string TabName, string DisplayName)> tabs = new List<(string, string)>
+    {
+        ("login", "Hyr"),
+        ("register", "Regjistrohu")
+    };
+
+    private void SwitchTab(string tab)
+    {
+        activeTab = tab;
+    }
+}

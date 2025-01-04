@@ -1,4 +1,107 @@
 ﻿@page "/inspections"
-<h3>Cars</h3>
-<p>This is the Cars page.</p>
+@rendermode InteractiveServer
+<!-- 🛡️ Seksioni 1: Hero Section (Banner Kryesor) -->
+<section class="hero-section py-5 text-center bg-primary text-white" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
+    <div >
+        <h1 class="display-4">Inspektime Profesionale për një Blerje të Sigurt!</h1>
+        <p class="lead">Ekspertët tanë ju ndihmojnë të merrni vendimin e duhur për blerjen e automjetit tuaj.</p>
+        <div class="mt-4">
+            <button class="btn btn-light me-2">Apliko si Inspektor</button>
+            <button class="btn btn-outline-light">Kërko Inspektor</button>
+        </div>
+    </div>
+    <img src="/images/inspector-hero.jpg" alt="Inspektor me tabletë që kontrollon një makinë" class="img-fluid mt-4">
+</section>
 
+<!-- 📋 Seksioni 2: Pse të Zgjidhni Inspektorët Tanë? -->
+<section class="why-choose-us py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Pse të Zgjidhni Inspektorët Tanë?</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <i class="bi bi-briefcase-fill display-4 text-primary"></i>
+                <h4>Profesionalizëm</h4>
+                <p>Inspektorë të certifikuar me përvojë të pasur.</p>
+            </div>
+            <div class="col-md-4">
+                <i class="bi bi-clock-fill display-4 text-primary"></i>
+                <h4>Kursim Kohe</h4>
+                <p>Inspektime të shpejta dhe raporte të detajuara.</p>
+            </div>
+            <div class="col-md-4">
+                <i class="bi bi-shield-lock-fill display-4 text-primary"></i>
+                <h4>Siguri</h4>
+                <p>Garanci për një transaksion të sigurt.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 🔍 Seksioni 3: Kërko një Inspektor -->
+<section class="search-inspector py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Kërko një Inspektor</h2>
+        <form class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Lokacioni:</label>
+                <select class="form-select">
+                    <option value="">Zgjidh qytetin</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Disponueshmëria:</label>
+                <input type="date" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Specializimi:</label>
+                <select class="form-select">
+                    <option>Inspektor për makina të përdorura</option>
+                    <option>Inspektor për makina të reja</option>
+                    <option>Inspektor për makina luksi</option>
+                </select>
+            </div>
+            <div class="col-12 text-center mt-3">
+                <button class="btn btn-primary">Kërko Inspektor</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+
+<!-- 🧑‍🔧 Seksioni 5: Inspektorët më të Mirë -->
+<section class="featured-inspectors py-5 bg-light">
+    <div class="container text-center">
+        <h2>Inspektorët më të Mirë</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <img src="/images/inspector1.jpg" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">John Doe</h5>
+                        <p>5+ vite përvojë</p>
+                        <button class="btn btn-secondary">Rezervo</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <img src="/images/inspector2.jpg" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">Jane Smith</h5>
+                        <p>8+ vite përvojë</p>
+                        <button class="btn btn-secondary">Rezervo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 📲 Seksioni 9: Thirrje për Veprim -->
+<section class="cta text-center py-5 bg-primary text-white" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
+    <div>
+        <h2>Bëhu pjesë e rrjetit tonë të inspektorëve profesionalë sot!</h2>
+        <button class="btn btn-light me-2">Apliko Tani</button>
+        <button class="btn btn-outline-light">Kontakto për Më Shumë Informacion</button>
+    </div>
+</section>

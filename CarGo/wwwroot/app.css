@@ -78,22 +78,129 @@ input, select {
 .card-text {
     font-size: 0.9rem;
 }
-footer {
-    position: relative;
-    bottom: 0;
-    width: 100%;
+.footer {
     background-color: #333;
     color: white;
-    text-align: center;
-    padding: 20px;
+    padding: 30px 0;
+    font-size: 14px;
 }
 
-    footer a {
-        color: #ddd;
+/* Footer Container */
+.footer-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
+}
+
+/* Logo Section */
+.footer-logo {
+    flex: 1;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+    .footer-logo img {
+        width: 120px;
+        height: auto;
+    }
+
+/* Footer Content (Horizontal) */
+.footer-content {
+    flex: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 30px;
+}
+
+.footer-section {
+    flex: 1;
+    text-align: left;
+    min-width: 120px;
+}
+
+    .footer-section h4 {
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .footer-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .footer-section ul li {
+            margin: 5px 0;
+        }
+
+            .footer-section ul li a {
+                color: white;
+                text-decoration: none;
+                font-size: 12px;
+            }
+
+                .footer-section ul li a:hover {
+                    text-decoration: underline;
+                }
+
+/* Social Media Links */
+.social-media-links {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+    .social-media-links i {
+        margin-right: 5px;
+        font-size: 14px;
+    }
+
+/* Footer Bottom */
+.footer-bottom {
+    background-color: #222;
+    color: #ccc;
+    padding: 10px 0;
+    text-align: center;
+    margin-top: 20px;
+}
+
+    .footer-bottom p a {
+        color: #ccc;
         text-decoration: none;
     }
 
-        footer a:hover {
-            color: #fff;
+        .footer-bottom p a:hover {
+            text-decoration: underline;
         }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+
+    .footer-logo {
+        text-align: center;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .footer-section {
+        text-align: center;
+    }
+}
+
+
 

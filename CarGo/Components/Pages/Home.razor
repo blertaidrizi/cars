@@ -1,8 +1,153 @@
 ﻿@page "/"
+@using CarGo.Models
+@using CarGo.Data
 @rendermode InteractiveServer
+@inject appDbContext dbContext
 
-<PageTitle>Home</PageTitle>
+<!-- 🚗 Seksioni 1: Hero Section -->
+<section class="hero-section text-center text-white py-5" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
+    <div >
+        <h1 class="fw-bold">Gjej, Inspekto dhe Transporto Automjetin Tënd të Ëndrrave!</h1>
+        <p class="lead">Platforma më e besueshme për blerjen dhe inspektimin e automjeteve në Evropë.</p>
+        <div class="mt-4">
+            <button class="btn btn-warning btn-lg me-2">Kërko Automjete</button>
+        </div>
+    </div>
+</section>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+
+<!-- 🔍 Seksioni 2: Kërkimi i Avancuar -->
+<section class="search-section py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-4">Kërkimi i Avancuar i Automjeteve</h2>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label>Lloji i Automjetit:</label>
+                <select class="form-select">
+                    <option>Sedan</option>
+                    <option>SUV</option>
+                    <option>Hatchback</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Marka & Modeli:</label>
+                <select class="form-select">
+                    <option>Audi</option>
+                    <option>BMW</option>
+                    <option>Mercedes</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Viti i Prodhimit:</label>
+                <select class="form-select">
+                    <option>2024</option>
+                    <option>2023</option>
+                    <option>2022</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Çmimi (Min - Max):</label>
+                <div class="input-group">
+                    <input type="number" placeholder="Min" class="form-control" />
+                    <span class="input-group-text">-</span>
+                    <input type="number" placeholder="Max" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <button class="btn btn-primary btn-lg">Kërko Tani</button>
+        </div>
+    </div>
+</section>
+
+<!-- 🛡️ Seksioni 3: Shërbimet Kryesore -->
+<section class="services-section py-5">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-4">Shërbimet Kryesore</h2>
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="card p-4 shadow-sm">
+                    <h5>🚗 Bli Automjete</h5>
+                    <p>Kërko automjetet më të mira nga shitësit e besueshëm.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 shadow-sm">
+                    <h5>🛠️ Inspekto Automjetin</h5>
+                    <p>Sigurohu për gjendjen teknike përpara blerjes.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 shadow-sm">
+                    <h5>🚚 Transport i Sigurt</h5>
+                    <p>Transport ndërkombëtar i besueshëm për automjetin tuaj.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 🌟 Seksioni 4: Automjetet e Fundit -->
+<section class="featured-section py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-4">Automjetet e Fundit në Platformë</h2>
+        <div class="row g-3">
+            @foreach (var car in featuredCars)
+            {
+                <div class="col-md-3">
+                    <div class="card shadow-sm">
+                       
+                        <div class="card-body">
+                            <h5>@car.Brand @car.Model</h5>
+                            <p>Viti: @car.Year | Çmimi: $@car.Price</p>
+                            <a href="#" class="btn btn-outline-primary btn-sm">Shiko Detajet</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- 📝 Seksioni 5: Procesi i Përdorimit -->
+<section class="process-section py-5 text-center">
+    <h2 class="fw-bold">Si Funksionon?</h2>
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <h5>🔍 Zgjidh Automjetin</h5>
+            <p>Kërko dhe filtro automjetin sipas preferencave.</p>
+        </div>
+        <div class="col-md-4">
+            <h5>🛠️ Inspekto Automjetin</h5>
+            <p>Apliko për një inspektim profesional.</p>
+        </div>
+        <div class="col-md-4">
+            <h5>🚚 Transporto me Siguri</h5>
+            <p>Zgjidh partnerët tanë për transport të sigurt.</p>
+        </div>
+    </div>
+</section>
+
+<!-- 💬 Seksioni 6: Rekomandime -->
+<section class="testimonials-section py-5 bg-light">
+    <h2 class="text-center fw-bold mb-4">Çfarë thonë klientët tanë?</h2>
+    <div class="container text-center">
+        <blockquote>"Shërbim i shkëlqyer dhe shumë profesional!"</blockquote>
+        <footer>- Klient i kënaqur</footer>
+    </div>
+</section>
+
+
+@code {
+    private List<Car> featuredCars { get; set;}
+
+    override protected void OnInitialized()
+    {
+         
+        featuredCars = dbContext.Cars.ToList();
+    }
+       
+
+    
+}

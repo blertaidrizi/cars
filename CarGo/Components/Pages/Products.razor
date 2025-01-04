@@ -120,7 +120,8 @@
                                 Price: $@car.Price <br>
                                 Transmission: @car.TransmissionType
                             </p>
-                            <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
+                            <a href="/car/@car.Id" class="btn btn-outline-primary btn-sm">View Details</a>
+
                         </div>
                     </div>
                 </div>
@@ -132,6 +133,8 @@
         <p class="text-muted">No cars match the selected criteria.</p>
     }
 </div>
+
+
 
 @code {
     private string selectedBrand = string.Empty;
@@ -148,12 +151,12 @@
 
     private List<Car> allCars = new List<Car>
     {
-        new Car { Brand = "Audi", Model = "A4", Year = 2020, Price = 25000, TransmissionType = "Automatic", Kilometers = 15000, HorsePower = 200, FuelType = "Petrol", EmissionClass = "Euro 6", ImageUrl = "https://assets.adac.de/image/upload/v1/Autodatenbank/Fahrzeugbilder/im05969-1-audi-a4-gtron.jpg"  },
-        new Car { Brand = "BMW", Model = "X3", Year = 2019, Price = 30000, TransmissionType = "Manual", Kilometers = 25000, HorsePower = 250, FuelType = "Diesel", EmissionClass = "Euro 6", ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg/1920px-2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg" },
-        new Car { Brand = "Mercedes-Benz", Model = "C-Class", Year = 2021, Price = 40000, TransmissionType = "Automatic", Kilometers = 10000, HorsePower = 300, FuelType = "Electric", EmissionClass = "Euro 6", ImageUrl = "https://vehicle-images.dealerinspire.com/94d1-110007965/W1KAF4GB5RR172203/11b2b2febedcb4d9e81e10de8fb47c7e.png" },
-        new Car { Brand = "Audi", Model = "A4", Year = 2020, Price = 25000, TransmissionType = "Automatic", Kilometers = 15000, HorsePower = 200, FuelType = "Petrol", EmissionClass = "Euro 6", ImageUrl = "https://assets.adac.de/image/upload/v1/Autodatenbank/Fahrzeugbilder/im05969-1-audi-a4-gtron.jpg"  },
-        new Car { Brand = "BMW", Model = "X3", Year = 2019, Price = 30000, TransmissionType = "Manual", Kilometers = 25000, HorsePower = 250, FuelType = "Diesel", EmissionClass = "Euro 6", ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg/1920px-2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg" },
-        new Car { Brand = "Mercedes-Benz", Model = "C-Class", Year = 2021, Price = 40000, TransmissionType = "Automatic", Kilometers = 10000, HorsePower = 300, FuelType = "Electric", EmissionClass = "Euro 6", ImageUrl = "https://vehicle-images.dealerinspire.com/94d1-110007965/W1KAF4GB5RR172203/11b2b2febedcb4d9e81e10de8fb47c7e.png" },
+        new Car {Id="1", Brand = "Audi", Model = "A4", Year = 2020, Price = 25000, TransmissionType = "Automatic", Kilometers = 15000, HorsePower = 200, FuelType = "Petrol", EmissionClass = "Euro 6", ImageUrl = "https://assets.adac.de/image/upload/v1/Autodatenbank/Fahrzeugbilder/im05969-1-audi-a4-gtron.jpg"  },
+        new Car {Id="2", Brand = "BMW", Model = "X3", Year = 2019, Price = 30000, TransmissionType = "Manual", Kilometers = 25000, HorsePower = 250, FuelType = "Diesel", EmissionClass = "Euro 6", ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg/1920px-2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg" },
+        new Car {Id="3", Brand = "Mercedes-Benz", Model = "C-Class", Year = 2021, Price = 40000, TransmissionType = "Automatic", Kilometers = 10000, HorsePower = 300, FuelType = "Electric", EmissionClass = "Euro 6", ImageUrl = "https://vehicle-images.dealerinspire.com/94d1-110007965/W1KAF4GB5RR172203/11b2b2febedcb4d9e81e10de8fb47c7e.png" },
+        new Car {Id="4", Brand = "Audi", Model = "A4", Year = 2020, Price = 25000, TransmissionType = "Automatic", Kilometers = 15000, HorsePower = 200, FuelType = "Petrol", EmissionClass = "Euro 6", ImageUrl = "https://assets.adac.de/image/upload/v1/Autodatenbank/Fahrzeugbilder/im05969-1-audi-a4-gtron.jpg"  },
+        new Car {Id="5", Brand = "BMW", Model = "X3", Year = 2019, Price = 30000, TransmissionType = "Manual", Kilometers = 25000, HorsePower = 250, FuelType = "Diesel", EmissionClass = "Euro 6", ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg/1920px-2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg" },
+        new Car {Id="6", Brand = "Mercedes-Benz", Model = "C-Class", Year = 2021, Price = 40000, TransmissionType = "Automatic", Kilometers = 10000, HorsePower = 300, FuelType = "Electric", EmissionClass = "Euro 6", ImageUrl = "https://vehicle-images.dealerinspire.com/94d1-110007965/W1KAF4GB5RR172203/11b2b2febedcb4d9e81e10de8fb47c7e.png" },
 
     };
 
@@ -187,6 +190,7 @@
 
     public class Car
     {
+        public string Id { get; set; }
         public string Brand { get; set; }
         public string Model { get; set; }
         public int Year { get; set; }
@@ -200,12 +204,4 @@
     }
    
 
-} <footer class="bg-dark text-white text-center py-4 mt-5">
-    <div class="container">
-        <p class="mb-0">© 2025 CarSearch. All Rights Reserved.</p>
-        <p>
-            <a href="#" class="text-white text-decoration-none">Privacy Policy</a> |
-            <a href="#" class="text-white text-decoration-none">Terms of Service</a>
-        </p>
-    </div>
-</footer>
+} 

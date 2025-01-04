@@ -1,3 +1,93 @@
-﻿@page "/transport-companies"
-<h3>Cars</h3>
-<p>This is the Cars page.</p>
+﻿@page "/transport"
+@rendermode InteractiveServer
+
+<!-- 🚛 Hero Section -->
+<section class="hero-section text-center text-white d-flex align-items-center justify-content-center" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
+    <div >
+        <h1 class="fw-bold">Transportoni Automjetin Tuaj me Siguri dhe Besueshmëri</h1>
+        <p class="lead">Partnerët tanë të transportit ofrojnë zgjidhje të sigurta dhe të përshtatshme për çdo destinacion.</p>
+        
+    </div>
+</section>
+
+<!-- 📋 Transport Options -->
+<section class="container mt-5">
+    <h2 class="text-center fw-bold mb-4">Opsionet e Transportit</h2>
+    <div class="row text-center">
+        <div class="col-md-3">
+            <i class="bi bi-car-front fs-1"></i>
+            <h5>Transport Individual</h5>
+            <p>Për makina të veçanta dhe transport të shpejtë.</p>
+        </div>
+        <div class="col-md-3">
+            <i class="bi bi-truck fs-1"></i>
+            <h5>Transport i Ngarkesave të Plotë</h5>
+            <p>Për transport të shumicës së makinave.</p>
+        </div>
+        <div class="col-md-3">
+            <i class="bi bi-globe fs-1"></i>
+            <h5>Transport Ndërkombëtar</h5>
+            <p>Transport i makinave nga një shtet në tjetrin.</p>
+        </div>
+        <div class="col-md-3">
+            <i class="bi bi-shield-check fs-1"></i>
+            <h5>Sigurimi i Makinës</h5>
+            <p>Sigurim i plotë gjatë transportit.</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ⭐ Transport Partners -->
+<section class="container mt-5">
+    <h2 class="text-center fw-bold mb-4">Partnerët Tanë</h2>
+    <div class="row text-center">
+        <div class="col-md-3">
+            <img src="/images/partner1.png" class="img-fluid" alt="Partner 1">
+        </div>
+        <div class="col-md-3">
+            <img src="/images/partner2.png" class="img-fluid" alt="Partner 2">
+        </div>
+        <div class="col-md-3">
+            <img src="/images/partner3.png" class="img-fluid" alt="Partner 3">
+        </div>
+        <div class="col-md-3">
+            <a href="#" class="btn btn-outline-primary">Shiko Partnerët e Plotë</a>
+        </div>
+    </div>
+</section>
+
+<!-- 📦 Tracking Section -->
+<section class="container mt-5 p-4 bg-light shadow rounded">
+    <h2 class="text-center fw-bold mb-4">Gjurmimi i Transportit</h2>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Vendos Kodin e Transportit">
+        <button class="btn btn-primary">Gjurmo Transportin</button>
+    </div>
+</section>
+
+<!-- 💬 FAQ Section -->
+<section class="container mt-5">
+    <h2 class="text-center fw-bold mb-4">Pyetje të Shpeshta</h2>
+    <div class="accordion" id="faqAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                    Si mund të gjurmoj automjetin tim gjatë transportit?
+                </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse show">
+                <div class="accordion-body">Përdorni kodin tuaj unik të transportit për të gjurmuar statusin në kohë reale.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 📲 CTA Section -->
+<section class="text-center py-5  text-black mt-5">
+    <h3>Transportoni makinën tuaj me partnerët tanë të besueshëm sot!</h3>
+    <a href="#" class="btn btn-light btn-lg mt-3">Na Kontaktoni</a>
+</section>
+
+
+
