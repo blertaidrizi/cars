@@ -1,5 +1,11 @@
 ﻿@page "/cars"
+@using CarGo.Models
+@using CarGo.Data
+@inject appDbContext dbContext;
+@inject NavigationManager navigation;
 @rendermode InteractiveServer
+
+<PageTitle>Cars</PageTitle>
 
 <h3 class="text-center mb-4 fw-bold text-primary">🚗 Search your car</h3>
 
@@ -9,9 +15,9 @@
         <!-- Brand Selection -->
         <div class="col-md-3">
             <label for="carBrand" class="form-label fw-semibold">Car Brand:</label>
-            <select id="carBrand" class="form-select" @bind="selectedBrand" @bind:event="onchange">
+            <select id="carBrand" class="form-select" @onchange="BrandChanged">
                 <option value="">-- All Brands --</option>
-                @foreach (var brand in carBrands.Keys)
+                @foreach (var brand in brands)
                 {
                     <option value="@brand">@brand</option>
                 }
@@ -24,7 +30,7 @@
                 <option value="">-- Select Model --</option>
                 @if (!string.IsNullOrEmpty(selectedBrand))
                 {
-                    @foreach (var model in carBrands[selectedBrand])
+                    @foreach (var model in models)
                     {
                         <option value="@model">@model</option>
                     }
@@ -34,13 +40,7 @@
         <!-- Year Selection -->
         <div class="col-md-3">
             <label for="year" class="form-label fw-semibold">Year:</label>
-            <select id="year" class="form-select" @bind="selectedYear">
-                <option value="">-- Select Year --</option>
-                @foreach (var year in years)
-                {
-                    <option value="@year">@year</option>
-                }
-            </select>
+            <InputNumber id="year" class="form-control" @bind-Value="selectedYear"/>
         </div>
         <!-- Price Range -->
         <div class="col-md-3">
@@ -110,15 +110,22 @@
         <div class="row g-3">
             @foreach (var car in filteredCars)
             {
-                <div class="col-md-4">
+                <div class="col-md-4" @onclick='()=>NavigateToCar(car.Id)'>
                     <div class="card shadow-sm border-0">
-                        <img src="@car.ImageUrl" class="card-img-top" alt="@car.Model">
+                        @foreach(var image in filteredImages)
+                        {
+                            if(image.CarId==car.Id)
+                            {
+                                <img src="@image.Url" class="card-img-top" alt="@car.Model">
+                                break;
+                            }
+                        }
                         <div class="card-body">
                             <h5 class="card-title fw-bold">@car.Brand @car.Model</h5>
                             <p class="card-text">
                                 Year: @car.Year <br>
                                 Price: $@car.Price <br>
-                                Transmission: @car.TransmissionType
+                                Transmission: @car.Transmission
                             </p>
                             <a href="/car/@car.Id" class="btn btn-outline-primary btn-sm">View Details</a>
 
@@ -139,7 +146,7 @@
 @code {
     private string selectedBrand = string.Empty;
     private string selectedModel = string.Empty;
-    private string selectedYear = string.Empty;
+    private int? selectedYear = null;
     private decimal? priceFrom = null;
     private decimal? priceTo = null;
     private int? kilometersFrom = null;
@@ -149,59 +156,64 @@
     private string fuelType = string.Empty;
     private string emissionClass = string.Empty;
 
-    private List<Car> allCars = new List<Car>
-    {
-        new Car {Id="1", Brand = "Audi", Model = "A4", Year = 2020, Price = 25000, TransmissionType = "Automatic", Kilometers = 15000, HorsePower = 200, FuelType = "Petrol", EmissionClass = "Euro 6", ImageUrl = "https://assets.adac.de/image/upload/v1/Autodatenbank/Fahrzeugbilder/im05969-1-audi-a4-gtron.jpg"  },
-        new Car {Id="2", Brand = "BMW", Model = "X3", Year = 2019, Price = 30000, TransmissionType = "Manual", Kilometers = 25000, HorsePower = 250, FuelType = "Diesel", EmissionClass = "Euro 6", ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg/1920px-2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg" },
-        new Car {Id="3", Brand = "Mercedes-Benz", Model = "C-Class", Year = 2021, Price = 40000, TransmissionType = "Automatic", Kilometers = 10000, HorsePower = 300, FuelType = "Electric", EmissionClass = "Euro 6", ImageUrl = "https://vehicle-images.dealerinspire.com/94d1-110007965/W1KAF4GB5RR172203/11b2b2febedcb4d9e81e10de8fb47c7e.png" },
-        new Car {Id="4", Brand = "Audi", Model = "A4", Year = 2020, Price = 25000, TransmissionType = "Automatic", Kilometers = 15000, HorsePower = 200, FuelType = "Petrol", EmissionClass = "Euro 6", ImageUrl = "https://assets.adac.de/image/upload/v1/Autodatenbank/Fahrzeugbilder/im05969-1-audi-a4-gtron.jpg"  },
-        new Car {Id="5", Brand = "BMW", Model = "X3", Year = 2019, Price = 30000, TransmissionType = "Manual", Kilometers = 25000, HorsePower = 250, FuelType = "Diesel", EmissionClass = "Euro 6", ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg/1920px-2018_BMW_X3_xDrive30d_M_Sport_Automatic_3.0_Front.jpg" },
-        new Car {Id="6", Brand = "Mercedes-Benz", Model = "C-Class", Year = 2021, Price = 40000, TransmissionType = "Automatic", Kilometers = 10000, HorsePower = 300, FuelType = "Electric", EmissionClass = "Euro 6", ImageUrl = "https://vehicle-images.dealerinspire.com/94d1-110007965/W1KAF4GB5RR172203/11b2b2febedcb4d9e81e10de8fb47c7e.png" },
-
-    };
-
     private List<Car> filteredCars = new List<Car>();
+    private List<Image> filteredImages = new List<Image>();
 
-    private Dictionary<string, List<string>> carBrands = new Dictionary<string, List<string>>
-    {
-        { "Audi", new List<string> { "A3", "A4", "Q5" } },
-        { "BMW", new List<string> { "X3", "X5" } },
-        { "Mercedes-Benz", new List<string> { "C-Class", "E-Class" } }
-    };
+    private List<string> brands = new List<string>();
+    private List<string> models = new List<string>();
 
     private List<int> years = Enumerable.Range(1980, DateTime.Now.Year - 1979).ToList();
 
+    protected override void OnInitialized()
+    {
+        brands = dbContext.Cars.Select(car => car.Brand).Distinct().ToList();
+        models = dbContext.Cars.Where(car => car.Brand == selectedBrand).Select(car => car.Model).Distinct().ToList();
+        filteredCars = dbContext.Cars.ToList();
+        filteredImages = dbContext.Images.ToList();
+    }
+
+    private void BrandChanged(ChangeEventArgs e)
+    {
+        selectedBrand = e.Value.ToString()??String.Empty;
+
+        if (!string.IsNullOrEmpty(selectedBrand))
+        {
+            models = dbContext.Cars
+                .Where(car => car.Brand == selectedBrand)
+                .Select(car => car.Model)
+                .Distinct()
+                .ToList();
+        }
+        else
+        {
+            models = new List<string>();
+        }
+
+        selectedModel = string.Empty;
+
+        StateHasChanged();
+    }
+
+    private void NavigateToCar(int id)
+    {
+        navigation.NavigateTo($"/car/{id}");
+    }
+
     private void OnFilterClicked()
     {
-        filteredCars = allCars.Where(car =>
+        filteredCars = dbContext.Cars.Where(car =>
             (string.IsNullOrEmpty(selectedBrand) || car.Brand == selectedBrand) &&
             (string.IsNullOrEmpty(selectedModel) || car.Model == selectedModel) &&
-            (string.IsNullOrEmpty(selectedYear) || car.Year.ToString() == selectedYear) &&
+            (!selectedYear.HasValue|| car.Year == selectedYear) &&
             (!priceFrom.HasValue || car.Price >= priceFrom.Value) &&
             (!priceTo.HasValue || car.Price <= priceTo.Value) &&
-            (!kilometersFrom.HasValue || car.Kilometers >= kilometersFrom.Value) &&
-            (!kilometersTo.HasValue || car.Kilometers <= kilometersTo.Value) &&
-            (!horsePowerFrom.HasValue || car.HorsePower >= horsePowerFrom.Value) &&
-            (!horsePowerTo.HasValue || car.HorsePower <= horsePowerTo.Value) &&
-            (string.IsNullOrEmpty(fuelType) || car.FuelType == fuelType) &&
+            (!kilometersFrom.HasValue || car.Km >= kilometersFrom.Value) &&
+            (!kilometersTo.HasValue || car.Km <= kilometersTo.Value) &&
+            (!horsePowerFrom.HasValue || car.Hp >= horsePowerFrom.Value) &&
+            (!horsePowerTo.HasValue || car.Hp <= horsePowerTo.Value) &&
+            (string.IsNullOrEmpty(fuelType) || car.Fuel == fuelType) &&
             (string.IsNullOrEmpty(emissionClass) || car.EmissionClass == emissionClass)
         ).ToList();
     }
-
-    public class Car
-    {
-        public string Id { get; set; }
-        public string Brand { get; set; }
-        public string Model { get; set; }
-        public int Year { get; set; }
-        public decimal Price { get; set; }
-        public string TransmissionType { get; set; }
-        public int Kilometers { get; set; }
-        public int HorsePower { get; set; }
-        public string FuelType { get; set; }
-        public string EmissionClass { get; set; }
-        public string ImageUrl { get; set; }
-    }
-   
 
 } 

@@ -3,6 +3,9 @@
 @using CarGo.Data
 @rendermode InteractiveServer
 @inject appDbContext dbContext
+@inject NavigationManager navigation
+
+<PageTitle>Home</PageTitle>
 
 <!-- 🚗 Seksioni 1: Hero Section -->
 <section class="hero-section text-center text-white py-5" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
@@ -10,7 +13,7 @@
         <h1 class="fw-bold">Gjej, Inspekto dhe Transporto Automjetin Tënd të Ëndrrave!</h1>
         <p class="lead">Platforma më e besueshme për blerjen dhe inspektimin e automjeteve në Evropë.</p>
         <div class="mt-4">
-            <button class="btn btn-warning btn-lg me-2">Kërko Automjete</button>
+            <button class="btn btn-warning btn-lg me-2" @onclick='()=>NavigateToCars()'>Kërko Automjete</button>
         </div>
     </div>
 </section>
@@ -22,42 +25,64 @@
     <div class="container">
         <h2 class="text-center fw-bold mb-4">Kërkimi i Avancuar i Automjeteve</h2>
         <div class="row g-3">
-            <div class="col-md-3">
+            @* <div class="col-md-3">
                 <label>Lloji i Automjetit:</label>
-                <select class="form-select">
-                    <option>Sedan</option>
-                    <option>SUV</option>
-                    <option>Hatchback</option>
+                <select class="form-select" @bind=type>
+                    <option value="Sedan">Sedan</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Hatchback">Hatchback</option>
                 </select>
-            </div>
-            <div class="col-md-3">
+            </div> *@
+            <div class="col-md-4">
                 <label>Marka & Modeli:</label>
-                <select class="form-select">
-                    <option>Audi</option>
-                    <option>BMW</option>
-                    <option>Mercedes</option>
+                <select class="form-select" @bind=model>
+                    <option value="Audi">Audi</option>
+                    <option value="BMW">BMW</option>
+                    <option value="Mercedes">Mercedes</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label>Viti i Prodhimit:</label>
-                <select class="form-select">
-                    <option>2024</option>
-                    <option>2023</option>
-                    <option>2022</option>
+                <select class="form-select" @bind=year>
+                    <option value=2011>2011</option>
+                    <option value=2023>2023</option>
+                    <option value=2022>2022</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label>Çmimi (Min - Max):</label>
                 <div class="input-group">
-                    <input type="number" placeholder="Min" class="form-control" />
+                    <input type="number" placeholder="Min" class="form-control" @bind=min/>
                     <span class="input-group-text">-</span>
-                    <input type="number" placeholder="Max" class="form-control" />
+                    <input type="number" placeholder="Max" class="form-control"  @bind=max/>
                 </div>
             </div>
         </div>
         <div class="text-center mt-4">
-            <button class="btn btn-primary btn-lg">Kërko Tani</button>
+            <button class="btn btn-primary btn-lg" @onclick='()=>SearchCars()'>Kërko Tani</button>
         </div>
+    </div>
+    <div class="row g-3">
+        @foreach (var car in searchedCars)
+        {
+            <div class="col-md-3" @onclick="()=>NavigateToCar(car.Id)">
+                <div class="card shadow-sm">
+                    @foreach (var image in images)
+                    {
+                        if (image.CarId == car.Id)
+                        {
+                            <img src="@image.Url" class="card-img-top" alt="@car.Model">
+                            break;
+                        }
+                    }
+                    <div class="card-body">
+                        <h5>@car.Brand @car.Model</h5>
+                        <p>Viti: @car.Year | Çmimi: $@car.Price</p>
+                        <a href="/car/@car.Id" class="btn btn-outline-primary btn-sm">Shiko Detajet</a>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </section>
 
@@ -75,7 +100,7 @@
             <div class="col-md-4">
                 <div class="card p-4 shadow-sm">
                     <h5>🛠️ Inspekto Automjetin</h5>
-                    <p>Sigurohu për gjendjen teknike përpara blerjes.</p>
+                    <p>Sigurohu për gjendjen teknike përpara blerjes së automjetit.</p>
                 </div>
             </div>
             <div class="col-md-4">
@@ -95,13 +120,20 @@
         <div class="row g-3">
             @foreach (var car in featuredCars)
             {
-                <div class="col-md-3">
+                <div class="col-md-3" @onclick='()=>NavigateToCar(car.Id)'>
                     <div class="card shadow-sm">
-                       
+                        @foreach (var image in images)
+                        {
+                            if (image.CarId == car.Id)
+                            {
+                                <img src="@image.Url" class="card-img-top" alt="@car.Model">
+                                break;
+                            }
+                        }
                         <div class="card-body">
                             <h5>@car.Brand @car.Model</h5>
                             <p>Viti: @car.Year | Çmimi: $@car.Price</p>
-                            <a href="#" class="btn btn-outline-primary btn-sm">Shiko Detajet</a>
+                            <a href="/car/@car.Id" class="btn btn-outline-primary btn-sm">Shiko Detajet</a>
                         </div>
                     </div>
                 </div>
@@ -140,14 +172,35 @@
 
 
 @code {
-    private List<Car> featuredCars { get; set;}
+    private int min = 0;
+    private int max = 0;
+    // private string type = "SUV";
+    private string model = "Audi";
+    private int year = 2011;
 
-    override protected void OnInitialized()
+    private List<Car> featuredCars = new List<Car>();
+    private List<Car> searchedCars = new List<Car>();
+    private List<Image> images = new List<Image>();
+
+    protected override void OnInitialized()
     {
-         
-        featuredCars = dbContext.Cars.ToList();
+        featuredCars = dbContext.Cars.Take(4).ToList();
+        images = dbContext.Images.ToList();
     }
-       
 
-    
+
+    private void NavigateToCars()
+    {
+        navigation.NavigateTo("/cars");
+    }
+
+    private void NavigateToCar(int id) 
+    { 
+        navigation.NavigateTo($"/car/{id}");
+    }
+
+    private void SearchCars()
+    {
+        searchedCars = dbContext.Cars.Where(car => car.Brand == model && car.Year == year && car.Price >= min && car.Price <= max).ToList();
+    }
 }
