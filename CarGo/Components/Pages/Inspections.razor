@@ -1,4 +1,7 @@
 ﻿@page "/inspections"
+@using CarGo.Models;
+@using CarGo.Data;
+@inject appDbContext dbContext;
 @rendermode InteractiveServer
 
 <PageTitle>Inspections</PageTitle>
@@ -76,26 +79,19 @@
     <div class="container text-center">
         <h2>Inspektorët më të Mirë</h2>
         <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <img src="/images/inspector1.jpg" class="card-img-top">
-                    <div class="card-body">
-                        <h5 class="card-title">John Doe</h5>
-                        <p>5+ vite përvojë</p>
-                        <button class="btn btn-secondary">Rezervo</button>
+            @foreach (var user in inspectors)
+            {
+                <div class="col-md-6">
+                    <div class="card">
+                        @* <img src="/images/inspector1.jpg" class="card-img-top"> *@
+                        <div class="card-body">
+                            <h5 class="card-title">John Doe</h5>
+                            <p>5+ vite përvojë</p>
+                            <button class="btn btn-secondary">Rezervo</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <img src="/images/inspector2.jpg" class="card-img-top">
-                    <div class="card-body">
-                        <h5 class="card-title">Jane Smith</h5>
-                        <p>8+ vite përvojë</p>
-                        <button class="btn btn-secondary">Rezervo</button>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>
@@ -108,3 +104,12 @@
         <button class="btn btn-outline-light">Kontakto për Më Shumë Informacion</button>
     </div>
 </section>
+
+@code{
+    private List<User> inspectors { get; set; }
+
+    protected override void OnInitialized()
+    {
+        inspectors = dbContext.Users.Where(user => user.Role == "Inspector").ToList();
+    }
+}

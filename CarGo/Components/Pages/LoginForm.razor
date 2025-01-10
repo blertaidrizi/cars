@@ -1,15 +1,53 @@
-﻿<!-- LoginForm.razor -->
+﻿@using CarGo.Models;
+@using CarGo.Data;
+@using CarGo.Components;
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@inject NavigationManager navigation;
+@inject appDbContext dbContext;
+@inject AuthenticationStateProvider authStateProvider
+@rendermode InteractiveServer
+
+<!-- LoginForm.razor -->
 <div class="tab-pane fade show active">
-    <form class="mt-4">
+    <form class="mt-4" @onsubmit="HandleLogin">
         <div class="mb-3">
             <label class="form-label">Email</label>
-            <input type="email" class="form-control">
+            <input type="email" class="form-control" @bind=email required>
         </div>
         <div class="mb-3">
-            <label class="form-label">Fjalëkalimi</label>
-            <input type="password" class="form-control">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" @bind=password required>
         </div>
-        <button class="btn btn-primary w-100">Hyr</button>
+        <button class="btn btn-primary w-100" type="submit">Login</button>
     </form>
 </div>
+
+@code {
+    private string? email { get; set; }
+    private string? password { get; set; }
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var user = dbContext.Users.FirstOrDefault(u => u.Email == email && u.PasswordHash == password);
+
+            if (user is null)
+            {
+                Console.WriteLine("Invalid email or password.");
+                return;
+            }
+            navigation.NavigateTo($"/login?email={Uri.EscapeDataString(user.Email)}&role={Uri.EscapeDataString(user.Role)}&name={Uri.EscapeDataString(user.FirstName)}");
+
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
+}
 

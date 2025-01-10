@@ -14,7 +14,7 @@ namespace CarGo.Models
         public string Address { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
-        public float? Rating { get; set; }
+        public double? Rating { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿@page "/account"
 @rendermode InteractiveServer
+@inject NavigationManager navigation;
 
 <section class="account-section py-5">
     <div class="container">
@@ -17,7 +18,7 @@
                 <div class="tab-content" id="accountTabsContent">
                     @if (activeTab == "login")
                     {
-                        <LoginForm />
+                         <LoginForm /> 
                     }
                     @if (activeTab == "register")
                     {
@@ -42,6 +43,9 @@
         ("login", "Hyr"),
         ("register", "Regjistrohu")
     };
+    [CascadingParameter]
+    public HttpContext httpContext{ get; set; }
+
 
     private void SwitchTab(string tab)
     {

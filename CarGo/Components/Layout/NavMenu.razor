@@ -1,14 +1,18 @@
-﻿@* Shared/NavMenu.razor *@
+﻿@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject IHttpContextAccessor httpContextAccessor
+@inject NavigationManager navigation
+
 <nav class="navbar navbar-expand-lg navbar-dark navbar-gradient">
     <div class="container-fluid">
         <!-- Logo on the left -->
         <a class="navbar-brand" href="/"><img src=".\logo.png" width="50px" height="50px" style="object-fit:cover" /></a>
-        
+
         <!-- Toggle button for mobile -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        
+
         <!-- Navigation menu on the right -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -24,12 +28,47 @@
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/transport">Transport Companies</NavLink>
                 </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="/account">
-                        <i class="bi bi-person-circle"></i>
-                    </NavLink>
-                </li>
+
+                <AuthorizeView>
+                    <Authorized>
+                        <!-- Account Dropdown if logged in -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i> Account
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><NavLink class="dropdown-item" href="/profile">Profile</NavLink></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><NavLink class="dropdown-item" href="/logout">LogOut</NavLink></li>
+                            </ul>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
+                        <!-- Login/Register Links if not logged in -->
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="/account">Login / Register</NavLink>
+                        </li>
+                    </NotAuthorized>
+                </AuthorizeView>
             </ul>
         </div>
     </div>
 </nav>
+
+@code {
+    private async Task Logout()
+    {
+        // Make sure HttpContext is available
+        var httpContext = httpContextAccessor.HttpContext;
+
+        // Check if the user is authenticated
+        if (httpContext?.User.Identity.IsAuthenticated ?? false)
+        {
+            // Sign out the user
+            await httpContext.SignOutAsync();
+
+            // After signing out, redirect to the home page
+            navigation.NavigateTo("/", forceLoad: true); // This forces a full page reload
+        }
+    }
+}
