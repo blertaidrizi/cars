@@ -1,0 +1,87 @@
+﻿@page "/myPosts"
+@using CarGo.Models
+@using CarGo.Data
+@inject appDbContext dbContext;
+@inject NavigationManager navigation;
+@inject IHttpContextAccessor HttpContextAccesor
+@rendermode InteractiveServer
+
+<PageTitle>My Posts</PageTitle>
+
+<!-- Car List Section -->
+<div class="container mt-5">
+    <h4 class="fw-bold mb-3" style="text-align:center">Available Cars:</h4>
+    @if (filteredCars.Any())
+    {
+        <div class="row g-3">
+            @foreach (var car in filteredCars)
+            {
+                <div class="col-md-4" @onclick='()=>NavigateToCar(car.Id)'>
+                    <div class="card shadow-sm border-0">
+                        @foreach (var image in filteredImages)
+                        {
+                            if (image.CarId == car.Id)
+                            {
+                                string imageUrl = image.Url;
+
+                                // Check if the image URL is an internal upload path
+                                if (!Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
+                                {
+                                    // It's an internal image path, prepend the /uploads/ base URL
+                                    imageUrl = imageUrl;
+                                }
+
+                                <img src="@imageUrl" class="card-img-top" alt="@car.Model">
+                                break;
+                            }
+                        }
+
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">@car.Brand @car.Model</h5>
+                            <p class="card-text">
+                                Year: @car.Year <br>
+                                Price: $@car.Price <br>
+                                Transmission: @car.Transmission
+                            </p>
+                            <a href="/clients/@car.Id" class="btn btn-outline-primary btn-sm">View Clients</a>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div style="text-align:center; padding:150px;">
+            <p class="text-muted">No cars match the selected criteria.</p>
+        </div>
+    }
+</div>
+
+
+
+@code {
+
+    private List<Car> filteredCars = new List<Car>();
+    private List<CarGo.Models.Image> filteredImages = new List<CarGo.Models.Image>();
+    private User user { get; set; }
+
+    private List<string> brands = new List<string>();
+    private List<string> models = new List<string>();
+
+    private List<int> years = Enumerable.Range(1980, DateTime.Now.Year - 1979).ToList();
+
+    protected override void OnInitialized()
+    {
+        var email = HttpContextAccesor.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        filteredImages = dbContext.Images.ToList();
+        user = dbContext.Users.First(u => u.Email == email);
+        filteredCars = dbContext.Cars.Where(c=>c.SellerId==user.Id).ToList();
+    }
+
+    private void NavigateToCar(int id)
+    {
+        navigation.NavigateTo($"/clients/{id}");
+    }
+}

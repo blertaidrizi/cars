@@ -2,21 +2,20 @@
 @using CarGo.Models;
 @using CarGo.Data;
 @inject appDbContext dbContext;
+@inject NavigationManager navigation;
 @rendermode InteractiveServer
 
 <PageTitle>Inspections</PageTitle>
 
 <!-- 🛡️ Seksioni 1: Hero Section (Banner Kryesor) -->
-<section class="hero-section py-5 text-center bg-primary text-white" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
-    <div >
-        <h1 class="display-4">Inspektime Profesionale për një Blerje të Sigurt!</h1>
+<section class="hero-section text-center text-white d-flex align-items-center justify-content-center" style="background:url('/in.jpg') no-repeat center center/cover ;height: 500px;">
+    <div>
+        <h1 class="fw-bold">Inspektime Profesionale për një Blerje të Sigurt!</h1>
         <p class="lead">Ekspertët tanë ju ndihmojnë të merrni vendimin e duhur për blerjen e automjetit tuaj.</p>
         <div class="mt-4">
-            <button class="btn btn-light me-2">Apliko si Inspektor</button>
-            <button class="btn btn-outline-light">Kërko Inspektor</button>
+            <button class="btn btn-light me-2" @onclick="NavigateToApply">Apliko si Inspektor</button>
         </div>
     </div>
-    <img src="/images/inspector-hero.jpg" alt="Inspektor me tabletë që kontrollon një makinë" class="img-fluid mt-4">
 </section>
 
 <!-- 📋 Seksioni 2: Pse të Zgjidhni Inspektorët Tanë? -->
@@ -43,36 +42,6 @@
     </div>
 </section>
 
-<!-- 🔍 Seksioni 3: Kërko një Inspektor -->
-<section class="search-inspector py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-4">Kërko një Inspektor</h2>
-        <form class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">Lokacioni:</label>
-                <select class="form-select">
-                    <option value="">Zgjidh qytetin</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Disponueshmëria:</label>
-                <input type="date" class="form-control">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Specializimi:</label>
-                <select class="form-select">
-                    <option>Inspektor për makina të përdorura</option>
-                    <option>Inspektor për makina të reja</option>
-                    <option>Inspektor për makina luksi</option>
-                </select>
-            </div>
-            <div class="col-12 text-center mt-3">
-                <button class="btn btn-primary">Kërko Inspektor</button>
-            </div>
-        </form>
-    </div>
-</section>
-
 
 <!-- 🧑‍🔧 Seksioni 5: Inspektorët më të Mirë -->
 <section class="featured-inspectors py-5 bg-light">
@@ -83,11 +52,10 @@
             {
                 <div class="col-md-6">
                     <div class="card">
-                        @* <img src="/images/inspector1.jpg" class="card-img-top"> *@
+                        <img src="/account.png" class="card-img-top" width="10px" height="10px" style="object-fit:cover"> 
                         <div class="card-body">
-                            <h5 class="card-title">John Doe</h5>
+                            <h5 class="card-title">@user.FirstName @user.LastName</h5>
                             <p>5+ vite përvojë</p>
-                            <button class="btn btn-secondary">Rezervo</button>
                         </div>
                     </div>
                 </div>
@@ -111,5 +79,10 @@
     protected override void OnInitialized()
     {
         inspectors = dbContext.Users.Where(user => user.Role == "Inspector").ToList();
+    }
+
+    public void NavigateToApply()
+    {
+        navigation.NavigateTo("/applyInspector");
     }
 }

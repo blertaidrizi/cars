@@ -1,0 +1,126 @@
+﻿@page "/myInspections"
+@using CarGo.Models
+@using CarGo.Data
+@inject appDbContext dbContext
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<PageTitle>My Inspections</PageTitle>
+
+<h3 class="text-center mb-4 fw-bold text-black display-5">My Inspections</h3>
+
+@if (inspections.Any())
+{
+    <div class="container shadow-lg p-4 rounded-4 bg-light">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Car</th>
+                    <th scope="col">Buyer</th>
+                    <th scope="col">Inspection Date</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var inspection in inspections)
+                {
+                    <tr>
+                        <td>@(dbContext.Cars.First(c => c.Id == inspection.CarId).Model) @(dbContext.Cars.First(c => c.Id == inspection.CarId).Brand) @(dbContext.Cars.First(c => c.Id == inspection.CarId).Year)</td>
+                        <td>@(dbContext.Users.First(u => u.Id == inspection.BuyerId).FirstName) @(dbContext.Users.First(u => u.Id == inspection.BuyerId).LastName)</td>
+                        <td>
+                            @if (inspection.InspectedTime is not null)
+                            {
+                                <span>@inspection.InspectedTime.ToString()</span>
+                            }
+                            else
+                            {
+                                <span></span>
+                            }
+                        </td>
+                        <td>
+                            @if (inspection.InspectedTime == null)
+                            {
+                                <span style="color:red">Not Inspected</span>
+                            }
+                            else
+                            {
+                                <span style="color:green">Inspected</span>
+                            }
+                        </td>
+                        <td>
+                            @if(inspection.Notes is null)
+                            {
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#noteModal" @onclick="() => OpenNoteModal(inspection)">Add/Update Note</button>
+                            }
+                            else
+                            {
+                                <span>@inspection.Notes</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-center text-muted fst-italic">No inspections assigned to you.</p>
+}
+
+<!-- Modal for adding or updating the note -->
+<div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="noteModalLabel">Add/Update Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" rows="5" @bind="selectedInspection.Notes" placeholder="Enter note here..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" @onclick="SaveNotes">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Order> inspections = new();
+    private Order selectedInspection = new(); // To store the selected inspection for editing
+
+    protected override void OnInitialized()
+    {
+        // Get the current inspector's ID
+        var email = HttpContextAccessor.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        var inspector = dbContext.Users.First(i => i.Email == email);
+        inspections = dbContext.Orders.Where(o => o.InspectorId == inspector.Id).ToList();
+    }
+
+    private void OpenNoteModal(Order inspection)
+    {
+        // Set the selected inspection to allow editing the note
+        selectedInspection = dbContext.Orders.FirstOrDefault(i => i.Id == inspection.Id);
+    }
+
+    private async Task SaveNotes()
+    {
+        if (selectedInspection != null)
+        {
+            // Update only the Notes and InspectedTime fields
+            selectedInspection.Notes = selectedInspection.Notes;
+            selectedInspection.InspectedTime = DateTime.Now; // Set InspectedTime to current time
+
+            // Save changes to the database
+            dbContext.Orders.Update(selectedInspection);
+            dbContext.SaveChanges();
+
+            // Close the modal programmatically after saving the note
+            await JS.InvokeVoidAsync("$('#noteModal').modal('hide')");
+        }
+    }
+}

@@ -1,17 +1,16 @@
 ﻿@page "/logout"
 @using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using System.Security.Claims
 @inject IHttpContextAccessor HttpContextAccessor;
-@inject NavigationManager navigation
-
+@inject NavigationManager navigation;
 @code {
-    protected async override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        if(HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+        if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
         {
             await HttpContextAccessor.HttpContext.SignOutAsync();
-            await Task.Yield();
-            navigation.NavigateTo("/");
+            HttpContextAccessor.HttpContext.Response.Redirect("/", true);
         }
-        
     }
 }

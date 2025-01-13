@@ -1,0 +1,79 @@
+﻿@page "/applyInspector"
+@using CarGo.Models;
+@using CarGo.Data;
+@inject appDbContext dbContext;
+@inject NavigationManager navigation;
+@rendermode InteractiveServer
+
+<!-- RegisterForm.razor -->
+ <h3 class="text-center mb-4 fw-bold text-black display-5">Apliko si Inspektor</h3>
+
+        <div class="container shadow-lg p-4 rounded-4 bg-light">
+<div class="tab-pane fade show active">
+    <form class="mt-4" @onsubmit=HandleSubmit>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Emri" @bind="firstName">
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Mbiemri" @bind="lastName">
+            </div>
+            <div class="col-md-12">
+                <input type="email" class="form-control" placeholder="Email" @bind="email">
+            </div>
+            <div class="col-md-12">
+                <input type="password" class="form-control" placeholder="Fjalëkalimi" @bind="password">
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Numri i telefonit" @bind="phone">
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Shteti" @bind="country">
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Qyteti" @bind="city">
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Adresa" @bind="address">
+            </div>
+      
+            <div class="col-12 text-center mt-3">
+                <button class="btn btn-primary w-100" type="submit">Apliko</button>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+
+@code {
+    private string firstName { get; set; }
+    private string lastName { get; set; }
+    private string email { get; set; }
+    private string password { get; set; }
+    private string phone { get; set; }
+    private string country { get; set; }
+    private string city { get; set; }
+    private string address { get; set; }
+
+    private void HandleSubmit()
+    {
+        Inspector user = new Inspector()
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                PasswordHash = password,
+                PhoneNumber = phone,
+                Country = country,
+                City = city,
+                Address = address,
+                Role = "Inspector",
+                CreatedAt = DateTime.Now
+            };
+
+        dbContext.Inspectors.Add(user);
+        dbContext.SaveChanges();
+        navigation.NavigateTo("/inspections");
+    }
+
+}

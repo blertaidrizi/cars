@@ -4,16 +4,18 @@
 @rendermode InteractiveServer
 @inject appDbContext dbContext
 @inject NavigationManager navigation
+@inject IHttpContextAccessor httpContextAccessor
 
 <PageTitle>Home</PageTitle>
 
 <!-- 🚗 Seksioni 1: Hero Section -->
-<section class="hero-section text-center text-white py-5" style="background: linear-gradient(90deg, #010026 0%, #1A0954 50%, #0300C7 100%);">
-    <div >
+<section class="hero-section text-center text-white d-flex align-items-center justify-content-center" style="background:url('/hh.jpg') no-repeat center center/cover;height: 500px;">
+    <div>
         <h1 class="fw-bold">Gjej, Inspekto dhe Transporto Automjetin Tënd të Ëndrrave!</h1>
         <p class="lead">Platforma më e besueshme për blerjen dhe inspektimin e automjeteve në Evropë.</p>
         <div class="mt-4">
-            <button class="btn btn-warning btn-lg me-2" @onclick='()=>NavigateToCars()'>Kërko Automjete</button>
+            <button class="btn btn-dark btn-lg me-2" @onclick='()=>NavigateToCars()'>Kërko Automjete</button>
+            <button class="btn btn-secondary btn-lg me-2" @onclick='()=>NavigateToPostCar()'>Posto Automjetin</button>
         </div>
     </div>
 </section>
@@ -25,14 +27,6 @@
     <div class="container">
         <h2 class="text-center fw-bold mb-4">Kërkimi i Avancuar i Automjeteve</h2>
         <div class="row g-3">
-            @* <div class="col-md-3">
-                <label>Lloji i Automjetit:</label>
-                <select class="form-select" @bind=type>
-                    <option value="Sedan">Sedan</option>
-                    <option value="SUV">SUV</option>
-                    <option value="Hatchback">Hatchback</option>
-                </select>
-            </div> *@
             <div class="col-md-4">
                 <label>Marka & Modeli:</label>
                 <select class="form-select" @bind=model>
@@ -180,11 +174,12 @@
 
     private List<Car> featuredCars = new List<Car>();
     private List<Car> searchedCars = new List<Car>();
-    private List<Image> images = new List<Image>();
+    private List<CarGo.Models.Image> images = new List<CarGo.Models.Image>();
 
     protected override void OnInitialized()
     {
-        featuredCars = dbContext.Cars.Take(4).ToList();
+        bool flag = httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
+        featuredCars = dbContext.Cars.Where(car => car.Status == "For Sale").Take(4).ToList();
         images = dbContext.Images.ToList();
     }
 
@@ -199,8 +194,13 @@
         navigation.NavigateTo($"/car/{id}");
     }
 
+    private void NavigateToPostCar()
+    {
+        navigation.NavigateTo("/post-car");
+    }
+
     private void SearchCars()
     {
-        searchedCars = dbContext.Cars.Where(car => car.Brand == model && car.Year == year && car.Price >= min && car.Price <= max).ToList();
+        searchedCars = dbContext.Cars.Where(car => car.Brand == model && car.Year == year && car.Price >= min && car.Price <= max && car.Status=="For Sale").ToList();
     }
 }

@@ -6,7 +6,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark navbar-gradient">
     <div class="container-fluid">
         <!-- Logo on the left -->
-        <a class="navbar-brand" href="/"><img src=".\logo.png" width="50px" height="50px" style="object-fit:cover" /></a>
+        <a class="navbar-brand" href="/"><img src=".\Logo.png" width="50px" height="50px" style="object-fit:cover" /></a>
 
         <!-- Toggle button for mobile -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,7 +28,20 @@
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/transport">Transport Companies</NavLink>
                 </li>
-
+                <AuthorizeView Roles="user, Seller">
+                    <Authorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="/myPosts">My Posts</NavLink>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Roles="Inspector">
+                    <Authorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="/myInspections">My Inspections</NavLink>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
                 <AuthorizeView>
                     <Authorized>
                         <!-- Account Dropdown if logged in -->
@@ -56,19 +69,5 @@
 </nav>
 
 @code {
-    private async Task Logout()
-    {
-        // Make sure HttpContext is available
-        var httpContext = httpContextAccessor.HttpContext;
-
-        // Check if the user is authenticated
-        if (httpContext?.User.Identity.IsAuthenticated ?? false)
-        {
-            // Sign out the user
-            await httpContext.SignOutAsync();
-
-            // After signing out, redirect to the home page
-            navigation.NavigateTo("/", forceLoad: true); // This forces a full page reload
-        }
-    }
+   
 }

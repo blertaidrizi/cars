@@ -3,17 +3,17 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Microsoft.AspNetCore.WebUtilities
-@inject IHttpContextAccessor HttpContextAccessor;
+@inject IHttpContextAccessor HttpContextAccessor; 
 @inject NavigationManager navigation
 
 @code {
     private string email { get; set; }
     private string name { get; set; }
     private string role { get; set; }
+    private HttpContext httpContext;
 
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
-        // Get query parameters from the current URI
         var uri = navigation.ToAbsoluteUri(navigation.Uri);
         var queryParams = QueryHelpers.ParseQuery(uri.Query);
 
@@ -21,10 +21,6 @@
         email = queryParams["email"];
         name = queryParams["name"];
         role = queryParams["role"];
-    }
-
-    protected async override Task OnInitializedAsync()
-    {
         var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, name ?? string.Empty),
@@ -35,8 +31,6 @@
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
         await HttpContextAccessor.HttpContext.SignInAsync(principal);
-        navigation.NavigateTo("/", forceLoad: true);
+        HttpContextAccessor.HttpContext.Response.Redirect("/",true);
     }
-    
-
 }

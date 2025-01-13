@@ -11,7 +11,8 @@ public class appDbContext : DbContext
     public DbSet<Tracking> Tracking { get; set; }
     public DbSet<TransportCompany> TransportCompany { get; set; }
     public DbSet<Image> Images { get; set; }
-
+    public DbSet<Inspector> Inspectors { get; set; }
+    public DbSet<Order> Orders { get; set; }
     public appDbContext(DbContextOptions<appDbContext> options) : base(options)
     {
     }

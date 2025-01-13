@@ -1,4 +1,4 @@
-﻿@page "/car/{CarId}"
+﻿@page "/clients/{CarId}"
 @using CarGo.Models
 @using CarGo.Data
 @using BlazorBootstrap
@@ -81,26 +81,69 @@
                         <span><strong>Location:</strong> @car.Location</span>
                     </div>
                     <div class="list-group-item d-flex align-items-center">
-                        <i class="fas fa-user-tie fa-2x text-secondary me-3"></i>
-                        <span><strong>Seller:</strong> @user.FirstName @user.LastName</span>
-                    </div>
-                    <div class="list-group-item d-flex align-items-center">
                         <i class="fas fa-calendar-alt fa-2x text-secondary me-3"></i>
                         <span><strong>Listed On:</strong> @car.CreatedAt.ToShortDateString()</span>
                     </div>
+                    <div class="text-end mt-5">
+                        <span class="fw-bold display-6 text-dark">€@car.Price</span>
+                    </div>
                 </div>
-
-                <!-- Buttons -->
-                <div class="d-flex flex-wrap gap-2 mt-4">
-                    <Button Color="ButtonColor.Primary" @onclick="ShowSaveConfirmationAsync"> Contact Seller </Button>
-                 </div>
             </div>
         </div>
 
-        <!-- Price Section -->
-        <div class="text-end mt-5">
-            <span class="fw-bold display-6 text-dark">€@car.Price</span>
-        </div>
+        @if (interestedClients.Any())
+        {
+            <div class="mt-5">
+                <h4 class="fw-bold text-dark mb-4">Interested Clients</h4>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">First Name</th>
+                            <th scope="col">Last Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in interestedClients)
+                        {
+                            var offer = dbContext.Orders.FirstOrDefault(o => o.BuyerId == user.Id && o.CarId == int.Parse(CarId));
+                            <tr>
+                                <td>@user.FirstName</td>
+                                <td>@user.LastName</td>
+                                <td>@user.Email</td>
+                                <td>
+                                    @if (offer != null)
+                                    {
+                                        <span class="badge @(offer.SellerStatus == "Accepted Offer" ? "bg-success" : offer.SellerStatus == "Rejected Offer" ? "bg-danger" : "bg-secondary")">
+                                            @offer.SellerStatus
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">No status</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (offer == null || offer.SellerStatus == null || offer.SellerStatus == "")
+                                    {
+                                        <button class="btn btn-success btn-sm me-2" @onclick="() => OnAcceptOffer(user.Id)">Accept</button>
+                                        <button class="btn btn-danger btn-sm" @onclick="() => OnRefuseOffer(user.Id)">Refuse</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-muted fst-italic mt-5">No clients have expressed interest in this car yet.</p>
+        }
+
+
     </div>
 }
 else
@@ -121,13 +164,14 @@ else
     private User account { get; set; }
     public Order order { get; set; }
 
+    private List<User> interestedClients = new();
+
     List<ToastMessage> messages = new List<ToastMessage>();
 
     private void ShowMessage(ToastType toastType) 
     { 
         messages.Add(CreateToastMessage(toastType));
         StateHasChanged();
-
     }
 
     private ToastMessage CreateToastMessage(ToastType toastType)
@@ -136,9 +180,8 @@ else
             Type = toastType,
             Title = "Seller Contacted",
             HelpText = $"{DateTime.Now}",
-            Message = $"Hello, {account.FirstName}!The seller has been contacted, wait for a reply these next days.",
+            Message = $"Hello, {account.FirstName}! The seller has been contacted, wait for a reply these next days.",
         };
-
 
     private ConfirmDialog dialog = default!;
 
@@ -159,21 +202,7 @@ else
 
         if (confirmation)
         {
-            var email = HttpContextAccessor.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            account = dbContext.Users.First(u => u.Email == email);
-            order = new Order
-            {
-                CarId = int.Parse(CarId),
-                BuyerId = account.Id,
-                SellerId = user.Id,
-                OrderedTime = DateTime.Now,
-                Notify = 1
-            };
-            dbContext.Orders.Add(order);
-            await dbContext.SaveChangesAsync();
-            ShowMessage(ToastType.Primary);
-            await Task.Delay(5000);
-            Navigation.NavigateTo("/cars");
+
 
         }
         else
@@ -182,16 +211,21 @@ else
         }
     }
 
-
     protected override void OnInitialized()
     {
-        
         if (int.TryParse(CarId, out int carId))
         {
             car = dbContext.Cars.FirstOrDefault(c => c.Id == carId);
             images = dbContext.Images.Where(img => img.CarId == carId).ToList();
             user = dbContext.Users.First(u => u.Id == car.SellerId);
-            
+
+            // Fetch clients interested in this car
+            List<int> interestedUsers = dbContext.Orders
+                .Where(o => o.CarId == carId).Select(u => u.BuyerId).ToList();
+
+            interestedClients = dbContext.Users
+           .Where(u => interestedUsers.Contains(u.Id))
+           .ToList();;
         }
     }
 
@@ -199,4 +233,55 @@ else
     {
         Navigation.NavigateTo("/cars");
     }
+
+    private async Task OnAcceptOffer(int clientId)
+    {
+        var inspector = dbContext.Users.First(u => u.Role == "Inspector");
+        var client = dbContext.Users.FirstOrDefault(u => u.Id == clientId);
+        if (client != null)
+        {
+            var acceptedOffer = dbContext.Orders.FirstOrDefault(o => o.BuyerId == clientId && o.CarId == int.Parse(CarId));
+            if (acceptedOffer != null)
+            {
+                acceptedOffer.SellerStatus = "Accepted Offer";
+                acceptedOffer.SoldTime = DateTime.Now;
+                acceptedOffer.InspectorId = inspector.Id;
+
+                var otherOffers = dbContext.Orders
+                    .Where(o => o.CarId == int.Parse(CarId) && o.BuyerId != clientId)
+                    .ToList();
+
+                foreach (var offer in otherOffers)
+                {
+                    offer.SellerStatus = "Rejected Offer";
+                }
+                car.Status = "Sold";
+
+                dbContext.SaveChanges();
+                StateHasChanged();
+                ShowMessage(ToastType.Success);
+            }
+        }
+    }
+
+
+
+    private async Task OnRefuseOffer(int clientId)
+    {
+        var client = dbContext.Users.FirstOrDefault(u => u.Id == clientId);
+        if (client != null)
+        {
+            var offer = dbContext.Orders.FirstOrDefault(o => o.BuyerId == clientId && o.CarId == int.Parse(CarId));
+            if (offer != null)
+            {
+                offer.SellerStatus = "Rejected Offer";
+                await dbContext.SaveChangesAsync();
+                StateHasChanged();
+                ShowMessage(ToastType.Warning);
+            }
+        }
+    }
+
+
 }
+

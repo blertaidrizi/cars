@@ -112,14 +112,24 @@
             {
                 <div class="col-md-4" @onclick='()=>NavigateToCar(car.Id)'>
                     <div class="card shadow-sm border-0">
-                        @foreach(var image in filteredImages)
+                        @foreach (var image in filteredImages)
                         {
-                            if(image.CarId==car.Id)
+                            if (image.CarId == car.Id)
                             {
-                                <img src="@image.Url" class="card-img-top" alt="@car.Model">
+                                string imageUrl = image.Url;
+
+                                // Check if the image URL is an internal upload path
+                                if (!Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
+                                {
+                                    // It's an internal image path, prepend the /uploads/ base URL
+                                    imageUrl = imageUrl;
+                                }
+
+                                <img src="@imageUrl" class="card-img-top" alt="@car.Model">
                                 break;
                             }
                         }
+
                         <div class="card-body">
                             <h5 class="card-title fw-bold">@car.Brand @car.Model</h5>
                             <p class="card-text">
@@ -157,7 +167,7 @@
     private string emissionClass = string.Empty;
 
     private List<Car> filteredCars = new List<Car>();
-    private List<Image> filteredImages = new List<Image>();
+    private List<CarGo.Models.Image> filteredImages = new List<CarGo.Models.Image>();
 
     private List<string> brands = new List<string>();
     private List<string> models = new List<string>();
@@ -168,7 +178,7 @@
     {
         brands = dbContext.Cars.Select(car => car.Brand).Distinct().ToList();
         models = dbContext.Cars.Where(car => car.Brand == selectedBrand).Select(car => car.Model).Distinct().ToList();
-        filteredCars = dbContext.Cars.ToList();
+        filteredCars = dbContext.Cars.Where(c=>c.Status=="For Sale").ToList();
         filteredImages = dbContext.Images.ToList();
     }
 
@@ -212,7 +222,8 @@
             (!horsePowerFrom.HasValue || car.Hp >= horsePowerFrom.Value) &&
             (!horsePowerTo.HasValue || car.Hp <= horsePowerTo.Value) &&
             (string.IsNullOrEmpty(fuelType) || car.Fuel == fuelType) &&
-            (string.IsNullOrEmpty(emissionClass) || car.EmissionClass == emissionClass)
+            (string.IsNullOrEmpty(emissionClass) || car.EmissionClass == emissionClass)&&
+            car.Status=="For Sale"
         ).ToList();
     }
 

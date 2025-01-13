@@ -1,0 +1,169 @@
+﻿@page "/post-car"
+@using Microsoft.AspNetCore.Components.Authorization
+@using CarGo.Models
+@using CarGo.Data
+@inject appDbContext dbContext
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+
+<PageTitle>Post Your Car</PageTitle>
+
+<AuthorizeView Context="auth">
+    <Authorized>
+        <h3 class="text-center mb-4 fw-bold text-black display-5">Post Your Car for Sale</h3>
+
+        <div class="container shadow-lg p-4 rounded-4 bg-light">
+            <EditForm Model="@car" FormName="Post" OnSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <!-- Car Details Form -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Brand</label>
+                        <InputText class="form-control" @bind-Value="car.Brand" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Model</label>
+                        <InputText class="form-control" @bind-Value="car.Model" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Year</label>
+                        <InputNumber class="form-control" @bind-Value="car.Year" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Price (€)</label>
+                        <InputNumber class="form-control" @bind-Value="car.Price" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fuel</label>
+                        <InputText class="form-control" @bind-Value="car.Fuel" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Transmission</label>
+                        <InputSelect class="form-control" @bind-Value="car.Transmission">
+                            <option value="">-- Select Transmission --</option>
+                            <option value="Automatic">Automatic</option>
+                            <option value="Manual">Manual</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Horsepower (HP)</label>
+                        <InputNumber class="form-control" @bind-Value="car.Hp" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Kilometers (Km)</label>
+                        <InputNumber class="form-control" @bind-Value="car.Km" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Color</label>
+                        <InputText class="form-control" @bind-Value="car.Color" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Emission Class</label>
+                        <InputSelect class="form-control" @bind-Value="car.EmissionClass">
+                            <option value="">-- Select Emission Class --</option>
+                            <option value="Euro 1">Euro 1</option>
+                            <option value="Euro 2">Euro 2</option>
+                            <option value="Euro 3">Euro 3</option>
+                            <option value="Euro 4">Euro 4</option>
+                            <option value="Euro 5">Euro 5</option>
+                            <option value="Euro 6">Euro 6</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Location</label>
+                        <InputText class="form-control" @bind-Value="car.Location" />
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="col-md-12">
+                        <label class="form-label">Upload Car Images</label>
+                        <InputFile OnChange="HandleImageUpload" multiple />
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-dark btn-lg shadow fw-semibold" @onclick="HandleValidSubmit">Post Car</button>
+                </div>
+            </EditForm>
+        </div>
+    </Authorized>
+
+    <NotAuthorized>
+        <div style="text-align:center; padding:150px;">
+            <h3>You must be logged in to post a car!</h3>
+            <p>Please log in to access this page.</p>
+            <button class="btn btn-primary" @onclick="NavigateToLogin">Go to Login</button>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private Car car = new();
+    private List<string> imageUrls = new();
+
+    private async Task HandleValidSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(car.Brand) ||
+            string.IsNullOrWhiteSpace(car.Model) ||
+            car.Year == 0 ||
+            car.Price <= 0 ||
+            string.IsNullOrWhiteSpace(car.Fuel) ||
+            string.IsNullOrWhiteSpace(car.Transmission) ||
+            car.Hp == 0 ||
+            car.Km == 0 ||
+            string.IsNullOrWhiteSpace(car.Color) ||
+            string.IsNullOrWhiteSpace(car.EmissionClass) ||
+            string.IsNullOrWhiteSpace(car.Location))
+        {
+            return;
+        }
+
+        car.SellerId = 1; // Hardcoded for now, replace with logged-in user's ID
+        car.CreatedAt = DateTime.Now;
+        car.Status = "For Sale";
+
+        dbContext.Cars.Add(car);
+        await dbContext.SaveChangesAsync();
+
+        // Save uploaded images
+        foreach (var url in imageUrls)
+        {
+            var image = new CarGo.Models.Image
+                {
+                    CarId = car.Id,
+                    Url = url
+                };
+            dbContext.Images.Add(image);
+        }
+
+        await dbContext.SaveChangesAsync();
+        Navigation.NavigateTo("/cars");
+    }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            var uniqueFileName = $"{Guid.NewGuid()}_{file.Name}";
+            var path = Path.Combine("wwwroot/uploads", uniqueFileName);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+
+            using var stream = file.OpenReadStream();
+            using var fileStream = System.IO.File.Create(path);
+            await stream.CopyToAsync(fileStream);
+
+            imageUrls.Add($"/uploads/{uniqueFileName}");
+        }
+    }
+
+    private void NavigateToLogin()
+    {
+        Navigation.NavigateTo("/account");
+    }
+}
